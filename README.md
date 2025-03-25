@@ -53,6 +53,8 @@ This method returns an array of time zones objects:
     mainCities: ["Los Angeles", "San Diego", "San Jose", "San Francisco"],
     rawOffsetInMinutes: -480,
     abbreviation: "PST",
+    dstAbbreviation: "PDT",
+    isDst: true,
     rawFormat: "-08:00 Pacific Time - Los Angeles, San Diego, San Jose, San Francisco",
     currentTimeOffsetInMinutes: -420, // "current" time zone offset, this is why getTimeZones() is a method and not just an object: it works at runtime
     currentTimeFormat: "-07:00 Pacific Time - Los Angeles, San Diego",
@@ -83,6 +85,8 @@ Here's a grouping example:
   mainCities: ["Fort St. John", "Creston", "Fort Nelson"],
   rawOffsetInMinutes: -420,
   abbreviation: "MST",
+  dstAbbreviation: "MDT",
+  isDst: false,
   rawFormat: "-07:00 Mountain Time - Fort St. John, Creston, Fort Nelson",
   currentTimeOffsetInMinutes: -420,
   currentTimeFormat: "-07:00 Mountain Time - Fort St. John, Creston"
@@ -107,6 +111,7 @@ This is an array of time zone objects without the current time information:
     mainCities: ["Los Angeles", "San Diego", "San Jose", "San Francisco"],
     rawOffsetInMinutes: -480,
     abbreviation: "PST",
+    dstAbbreviation: "PDT",
     rawFormat: "-08:00 Pacific Time - Los Angeles, San Diego, San Jose, San Francisco",
   },
   // ...

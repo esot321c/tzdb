@@ -225,6 +225,7 @@ async function run() {
 
       const { timeZoneName } = mainCitiesObject[0];
 
+      // Get standard time abbreviation (January)
       const januaryDate = DateTime.fromObject(
         {
           day: 1,
@@ -234,6 +235,18 @@ async function run() {
           locale: "en-US",
           zone: timeZoneName,
         },
+      );
+
+      // Get DST abbreviation (July) 
+      const julyDate = DateTime.fromObject(
+        {
+          day: 1,
+          month: 7,
+        },
+        {
+          locale: "en-US",
+          zone: timeZoneName,
+        }
       );
 
       let alternativeTimeZoneName = januaryDate
@@ -249,6 +262,19 @@ async function run() {
           alternativeNameCorrections[timeZoneName] || timeZoneName;
       }
 
+      const standardAbbreviation = getAbbreviation({
+        date: januaryDate,
+        timeZoneName: alternativeTimeZoneName,
+      });
+      
+      const dstAbbreviation = getAbbreviation({
+        date: julyDate,
+        timeZoneName: alternativeTimeZoneName,
+      });
+      
+      // Check if this timezone uses DST (different offsets or abbreviations)
+      const hasDst = januaryDate.offset !== julyDate.offset;
+
       const rawTimeZone = {
         name: timeZoneName,
         alternativeName: alternativeTimeZoneName,
@@ -261,12 +287,11 @@ async function run() {
         rawOffsetInMinutes: parseFloat(
           timeZonesInfo[timeZoneName].rawOffset * 60,
         ),
-        abbreviation: getAbbreviation({
-          date: januaryDate,
-          timeZoneName: alternativeTimeZoneName,
-        }),
+        abbreviation: standardAbbreviation,
+        ...(hasDst && { dstAbbreviation: dstAbbreviation }),
       };
 
+      // Add rawFormat after rawTimeZone is fully defined
       rawTimeZones.push({
         ...rawTimeZone,
         rawFormat: formatTimeZone(rawTimeZone),
