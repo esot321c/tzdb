@@ -237,18 +237,6 @@ async function run() {
         },
       );
 
-      // Get DST abbreviation (July) 
-      const julyDate = DateTime.fromObject(
-        {
-          day: 1,
-          month: 7,
-        },
-        {
-          locale: "en-US",
-          zone: timeZoneName,
-        }
-      );
-
       let alternativeTimeZoneName = januaryDate
         .toFormat(`ZZZZZ`)
         .replace(/Standard Time/g, "Time")
@@ -263,17 +251,17 @@ async function run() {
       }
 
       const standardAbbreviation = getAbbreviation({
-        date: januaryDate,
         timeZoneName: alternativeTimeZoneName,
+        isDst: false,
       });
-      
+
       const dstAbbreviation = getAbbreviation({
-        date: julyDate,
         timeZoneName: alternativeTimeZoneName,
+        isDst: true,
       });
-      
-      // Check if this timezone uses DST (different offsets or abbreviations)
-      const hasDst = januaryDate.offset !== julyDate.offset;
+
+      // Check if this timezone uses DST (different abbreviations)
+      const hasDst = standardAbbreviation !== dstAbbreviation;
 
       const rawTimeZone = {
         name: timeZoneName,
@@ -289,6 +277,7 @@ async function run() {
         ),
         abbreviation: standardAbbreviation,
         ...(hasDst && { dstAbbreviation: dstAbbreviation }),
+        test: "hello",
       };
 
       // Add rawFormat after rawTimeZone is fully defined
@@ -344,25 +333,43 @@ run().catch((error) => {
   process.exit(1);
 });
 
-function getAbbreviation({ date, timeZoneName }) {
+function getAbbreviation({ timeZoneName, isDst = false }) {
+  if (isDst) {
+    // Try daylight variant first
+    const daylightName = timeZoneName.replace("Time", "Daylight Time");
+    const daylightAbbreviation = abbreviations[daylightName];
+    if (daylightAbbreviation) {
+      return daylightAbbreviation;
+    }
+
+    // Try summer variant
+    const summerName = timeZoneName.replace("Time", "Summer Time");
+    const summerAbbreviation = abbreviations[summerName];
+    if (summerAbbreviation) {
+      return summerAbbreviation;
+    }
+  }
+
+  // Standard lookup logic
   const standardAbbreviation =
     abbreviations[timeZoneName.replace("Time", "Standard Time")];
-
   if (standardAbbreviation) {
     return standardAbbreviation;
   }
 
   const exactAbbreviation = abbreviations[timeZoneName];
-
   if (exactAbbreviation) {
     return exactAbbreviation;
   }
 
   console.log(
-    'Could not find abbreviation for "%s"',
+    'Could not find abbreviation for "%s" (isDst: %s)',
     timeZoneName,
-    date.toFormat(`ZZZZ`),
+    isDst,
   );
 
-  return date.toFormat(`ZZZZ`);
+  // Return a generic abbreviation
+  return isDst
+    ? timeZoneName.split(" ")[0].substring(0, 3) + "DT"
+    : timeZoneName.split(" ")[0].substring(0, 3) + "ST";
 }

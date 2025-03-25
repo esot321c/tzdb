@@ -33,7 +33,7 @@
   ],
   "scripts": {
     "build": "babel lib/ -d dist/ --source-maps --ignore '**/*.test.js' --delete-dir-on-start",
-    "postbuild": "cp index.d.ts dist/",
+    "postbuild": "copy index.d.ts dist\\",
     "format": "prettier --write '**/*.*' && eslint . --fix",
     "generate": "babel-node generate.js",
     "generate-abbreviations": "babel-node generate-abbreviations.js",
